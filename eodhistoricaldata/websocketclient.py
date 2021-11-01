@@ -2,13 +2,16 @@
 
 import re
 import json
-import time
+from time import sleep
 from datetime import datetime
 from threading import Thread
 from websocket import create_connection, WebSocketConnectionClosedException
 
-class WebSocket(): # pylint: disable=too-many-instance-attributes
+class WebSocketClient():
     """WebSocket class"""
+
+    # pylint: disable=too-many-instance-attributes
+    # Eleven is reasonable in this case
 
     def __init__(
         self,
@@ -124,7 +127,7 @@ class WebSocket(): # pylint: disable=too-many-instance-attributes
 
         while self.websocket.connected:
             self.websocket.ping("keepalive")
-            time.sleep(interval)
+            sleep(interval)
 
     def _disconnect(self):
         """Disconnect websocket"""
@@ -189,7 +192,7 @@ class WebSocket(): # pylint: disable=too-many-instance-attributes
 def main() -> None:
     """Main"""
 
-    websocket = WebSocket(
+    websocket = WebSocketClient(
         # Demo API key for testing purposes
         api_key="OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX", endpoint="crypto", symbols=["BTC-USD"]
         #api_key="OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX", endpoint="forex", symbols=["EURUSD"]
@@ -205,7 +208,7 @@ def main() -> None:
             ):
                 print(websocket.message)
                 message_count = websocket.message_count
-                time.sleep(0.25)  # output every 1/4 second, websocket is realtime
+                sleep(0.25)  # output every 1/4 second, websocket is realtime
 
 if __name__ == "__main__":
     main()
