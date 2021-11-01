@@ -1,29 +1,36 @@
 """Setup file for PyPI"""
 
-import pathlib
-from setuptools import find_packages, setup
+# To use a consistent encoding
+from codecs import open
+from os import path
+
+# Always prefer setuptools over distutils
+from setuptools import setup, find_packages
 
 # The directory containing this file
-HERE = pathlib.Path(__file__).parent
+HERE = path.abspath(path.dirname(__file__))
 
-# The text of the README file
-README = (HERE / "README.md").read_text()
+# Get the long description from the README file
+with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 # This call to setup() does all the work
 setup(
     name="eodhistoricaldata",
     version="0.1.0",
     description="EOD Historical Data Python Library (Unofficial)",
-    long_description=README,
+    long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/whittlem/eodhistoricaldata",
+    url="https://whittle.medium.com",
     author="Michael Whittle",
     author_email="michael@lifecycle-ps.com",
     license="MIT",
     classifiers=[
+        "Intended Audience :: Developers",
         "License :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
+        "Operating System :: OS Independent"
     ],
     packages=find_packages(include=["eodhistoricaldata"]),
     include_package_data=True,
