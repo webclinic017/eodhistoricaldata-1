@@ -31,10 +31,15 @@ class WebSocket(): # pylint: disable=too-many-instance-attributes
         if len(symbols) == 0:
             raise ValueError("No symbol(s) provided")
 
+        # Validate individual symbols
         prog = re.compile(r"^[A-Z0-9-]{3,8}$")
         for symbol in symbols:
             if not prog.match(symbol):
                 raise ValueError(f"Symbol is invalid: {symbol}")
+
+        # Validate max symbol subscriptions
+        if len(symbols) > 50:
+            raise ValueError("Max symbol subscription count is 50!")
 
         # Map class arguments to private variables
         self._api_key = api_key
@@ -51,6 +56,7 @@ class WebSocket(): # pylint: disable=too-many-instance-attributes
         self.thread = None
         self.keepalive = None
         self.websocket = None
+        self.message = None
 
     # Public functions
 
@@ -154,7 +160,6 @@ class WebSocket(): # pylint: disable=too-many-instance-attributes
     def on_open(self):
         """WebSocket on-open event"""
 
-        print("-- WebSocket Subscribed! --")
         self.message_count = 0
 
     def on_message(self, msg):
@@ -165,7 +170,8 @@ class WebSocket(): # pylint: disable=too-many-instance-attributes
                 (datetime.now()-self.start_time).total_seconds()
             )
         self.message_count += 1
-        print (msg)
+        self.message = msg
+        #print (self.message_count, msg)
 
     # Getters
 
@@ -182,12 +188,24 @@ class WebSocket(): # pylint: disable=too-many-instance-attributes
 
 def main() -> None:
     """Main"""
+
     websocket = WebSocket(
         # Demo API key for testing purposes
         api_key="OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX", endpoint="crypto", symbols=["BTC-USD"]
+        #api_key="OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX", endpoint="forex", symbols=["EURUSD"]
+        #api_key="OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX", endpoint="us", symbols=["AAPL"]
     )
     websocket.start()
 
+    message_count = 0
+    while True:
+        if websocket:
+            if (
+                message_count != websocket.message_count
+            ):
+                print(websocket.message)
+                message_count = websocket.message_count
+                time.sleep(0.25)  # output every 1/4 second, websocket is realtime
 
 if __name__ == "__main__":
     main()
