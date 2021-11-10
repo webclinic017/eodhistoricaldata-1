@@ -1,7 +1,6 @@
 """Setup file for PyPI"""
 
 # To use a consistent encoding
-from codecs import open
 from os import path
 
 # Always prefer setuptools over distutils
@@ -17,7 +16,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 # This call to setup() does all the work
 setup(
     name="eodhistoricaldata",
-    version="0.1.0",
+    version="0.3.0",
     description="EOD Historical Data Python Library (Unofficial)",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -27,14 +26,14 @@ setup(
     license="MIT",
     classifiers=[
         "Intended Audience :: Developers",
-        "License :: MIT License",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Operating System :: OS Independent"
     ],
     packages=find_packages(include=["eodhistoricaldata"]),
     include_package_data=True,
-    install_requires=["requests"],
+    install_requires=["websockets==10.0","websocket-client==1.2.1"],
     entry_points={
         "console_scripts": [
             "whittlem=eodhistoricaldata.__main__:main",

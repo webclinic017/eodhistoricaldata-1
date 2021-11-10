@@ -22,7 +22,7 @@ class WebSocketClient():
         super().__init__()
 
         # Validate API key
-        prog = re.compile(r"^[A-z0-9]{32}$")
+        prog = re.compile(r"^[A-z0-9.]{16,32}$")
         if not prog.match(api_key):
             raise ValueError("API key is invalid")
 
