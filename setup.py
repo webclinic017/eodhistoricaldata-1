@@ -16,7 +16,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 # This call to setup() does all the work
 setup(
     name="eodhistoricaldata",
-    version="0.3.0",
+    version="0.4.0",
     description="EOD Historical Data Python Library (Unofficial)",
     long_description=long_description,
     long_description_content_type="text/markdown",
