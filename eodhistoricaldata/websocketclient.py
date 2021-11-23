@@ -1,4 +1,4 @@
-"""__main__.py"""
+"""websocketclient.py"""
 
 import re
 import json

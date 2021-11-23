@@ -16,7 +16,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 # This call to setup() does all the work
 setup(
     name="eodhistoricaldata",
-    version="0.4.0",
+    version="0.4.1",
     description="EOD Historical Data Python Library (Unofficial)",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -33,7 +33,7 @@ setup(
     ],
     packages=find_packages(include=["eodhistoricaldata"]),
     include_package_data=True,
-    install_requires=["websockets==10.0","websocket-client==1.2.1"],
+    install_requires=["websockets==10.0","websocket-client==1.2.1","rich==10.14.0"],
     entry_points={
         "console_scripts": [
             "whittlem=eodhistoricaldata.__main__:main",
