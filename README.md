@@ -12,5 +12,5 @@ Demo API key below is provided by EOD Historial Data for testing purposes
 
 ## Sample code and examples
 
-example_api.py
-example_websockets.py
+* example_api.py
+* example_websockets.py
