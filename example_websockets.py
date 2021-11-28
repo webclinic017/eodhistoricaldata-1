@@ -1,4 +1,4 @@
-"""Sample script"""
+"""Websocket example"""
 
 from time import sleep
 from eodhistoricaldata import WebSocketClient
