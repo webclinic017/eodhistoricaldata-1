@@ -7,11 +7,13 @@ from datetime import datetime
 from datetime import timedelta
 from re import compile as re_compile
 import pandas as pd
+import numpy as np
 from requests import get as requests_get
 from requests import ConnectionError as requests_ConnectionError
 from requests import Timeout as requests_Timeout
 from requests.exceptions import HTTPError as requests_HTTPError
 from rich.console import Console
+from rich.progress import track
 
 # minimal traceback
 sys.tracebacklimit = 1
@@ -67,7 +69,7 @@ class DateUtils:
 
 
 class APIClient:
-    """APIclass"""
+    """API class"""
 
     def __init__(self, api_key: str) -> None:
         # Validate API key
@@ -158,7 +160,7 @@ class APIClient:
         results = 300
 
         # validate symbol
-        prog = re_compile(r"^[A-z0-9-$\.]{5,48}$")
+        prog = re_compile(r"^[A-z0-9-$\.+]{5,48}$")
         if not prog.match(symbol):
             raise ValueError(f"Symbol is invalid: {symbol}")
 
@@ -318,3 +320,84 @@ class APIClient:
                     "volume",
                 ]
             ]
+
+
+class ScannerClient:
+    """Scanner class"""
+
+    def __init__(self, api_key: str) -> None:
+        # Validate API key
+        prog = re_compile(r"^[A-z0-9.]{16,32}$")
+        if not prog.match(api_key):
+            raise ValueError("API key is invalid")
+
+        self.api = APIClient(api_key)
+
+    def scan_markets(
+        self,
+        market_type: str = "CC",
+        interval: str = Interval,
+        quote_currency: str = "USD",
+        request_limit: int = 5000,
+    ):
+        """Scan markets"""
+
+        if request_limit < 0 or request_limit > 100000:
+            raise ValueError("request limit is out of bounds!")
+
+        df_dataset = pd.DataFrame()
+
+        resp = self.api.get_exchange_symbols(market_type)
+        symbol_list = resp[
+            resp.Code.str.endswith(f"-{quote_currency}", na=False)
+        ].Code.to_numpy()
+
+        if request_limit > 0:
+            # truncate symbol list to request limit minus symbol list request
+            symbol_list = symbol_list[0 : request_limit - 1]
+
+        for symbol in track(symbol_list, description="Processing..."):
+            df_data = self.api.get_historical_data(f"{symbol}.{market_type}", interval)
+            if len(df_data) >= 200:
+
+                df_data["sma50"] = df_data.adjusted_close.rolling(
+                    50, min_periods=1
+                ).mean()
+                df_data["sma200"] = df_data.adjusted_close.rolling(
+                    200, min_periods=1
+                ).mean()
+                df_data["bull_market"] = df_data.sma50 >= df_data.sma200
+
+                df_data["ema12"] = df_data.adjusted_close.ewm(
+                    span=12, adjust=False
+                ).mean()
+                df_data["ema26"] = df_data.adjusted_close.ewm(
+                    span=26, adjust=False
+                ).mean()
+                df_data.loc[df_data["ema12"] > df_data["ema26"], "next_action"] = "sell"
+                df_data["next_action"].fillna("buy", inplace=True)
+
+                high_low = df_data["high"] - df_data["low"]
+                high_close = abs(df_data["high"] - df_data["adjusted_close"].shift())
+                low_close = abs(df_data["low"] - df_data["adjusted_close"].shift())
+                ranges = pd.concat([high_low, high_close, low_close], axis=1)
+                true_range = np.max(ranges, axis=1)
+                df_data["atr14"] = true_range.rolling(14).sum() / 14
+                df_data["atr14_pcnt"] = (
+                    df_data["atr14"] / df_data["adjusted_close"] * 100
+                ).round(2)
+
+                df_dataset = df_dataset.append(df_data.tail(1))
+
+        # drop infinite values
+        df_dataset.replace([np.inf, -np.inf], np.nan, inplace=True)
+        df_dataset.dropna(subset=["atr14_pcnt"], inplace=True)
+
+        df_dataset.sort_values(
+            by=["bull_market", "next_action", "volume", "atr14_pcnt"],
+            ascending=[False, True, False, False],
+            inplace=True,
+        )
+        df_dataset.to_csv("dataset.csv")
+
+        return df_dataset

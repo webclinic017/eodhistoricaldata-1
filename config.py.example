@@ -1,0 +1,3 @@
+"""EOD Historical Data (EODhd)"""
+
+API_KEY = "YOUR_API_KEY"

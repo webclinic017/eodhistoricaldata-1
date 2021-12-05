@@ -10,13 +10,13 @@ from setuptools import setup, find_packages
 HERE = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
+with open(path.join(HERE, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 # This call to setup() does all the work
 setup(
     name="eodhistoricaldata",
-    version="0.4.4",
+    version="0.5.0",
     description="EOD Historical Data Python Library (Unofficial)",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -29,11 +29,18 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
-        "Operating System :: OS Independent"
+        "Operating System :: OS Independent",
     ],
     packages=find_packages(include=["eodhistoricaldata"]),
     include_package_data=True,
-    install_requires=["websockets==10.0","websocket-client==1.2.1","requests==2.26.0","rich==10.14.0","pandas==1.3.4"],
+    install_requires=[
+        "websockets==10.0",
+        "websocket-client==1.2.1",
+        "requests==2.26.0",
+        "rich==10.14.0",
+        "pandas==1.3.4",
+        "numpy==1.21.4",
+    ],
     entry_points={
         "console_scripts": [
             "whittlem=eodhistoricaldata.__main__:main",
@@ -41,5 +48,5 @@ setup(
     },
     setup_requires=["pytest-runner"],
     tests_require=["pytest==6.2.5"],
-    test_suite="tests"
+    test_suite="tests",
 )
