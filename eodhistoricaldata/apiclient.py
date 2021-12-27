@@ -23,8 +23,8 @@ class Interval(Enum):
     """Enum: infraday"""
 
     MINUTE = "1m"
-    # FIVEMINUTES = "5m"
-    # HOUR = "1h"
+    FIVEMINUTES = "5m"
+    HOUR = "1h"
     ONEDAY = "1d"
 
 
@@ -208,9 +208,7 @@ class APIClient:
             prog = re_compile(r"^\d{4}\-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$")
 
             if range_end == "" or (range_end != "" and not prog.match(range_end)):
-                epoch_to = str(
-                    DateUtils.str2epoch(str(datetime.today().date()) + " 00:00:00")
-                )
+                epoch_to = ""
             else:
                 try:
                     epoch_to = int(
@@ -224,7 +222,17 @@ class APIClient:
 
             if range_start == "" or (range_start != "" and not prog.match(range_start)):
                 if interval == "1m":
-                    epoch_from = str(int(epoch_to) - (((60 * minutes) * results) - 1))
+                    epoch_from = str(
+                        DateUtils.str2epoch(str(datetime.now() - timedelta(days=1)).split(".")[0])
+                    )
+                elif interval == "5m":
+                    epoch_from = str(
+                        DateUtils.str2epoch(str(datetime.now() - timedelta(days=2)).split(".")[0])
+                    )
+                elif interval == "1h":
+                    epoch_from = str(
+                        DateUtils.str2epoch(str(datetime.now() - timedelta(days=14)).split(".")[0])
+                    )
                 else:
                     epoch_from = str(
                         int(epoch_to)
@@ -241,11 +249,37 @@ class APIClient:
                     )
                     sys.exit()
 
-            df_data = self._rest_get(
-                "intraday",
-                symbol,
-                f"&interval={interval}&from={str(epoch_from)}&to={str(epoch_to)}",
-            )
+            if epoch_to != "":
+                df_data = self._rest_get(
+                    "intraday",
+                    symbol,
+                    f"&interval={interval}&from={str(epoch_from)}&to={str(epoch_to)}",
+                )
+            else:
+                df_data = self._rest_get(
+                    "intraday",
+                    symbol,
+                    f"&interval={interval}&from={str(epoch_from)}",
+                )
+
+            if len(df_data) == 0:
+                return df_data[
+                    [
+                        "symbol",
+                        "interval",
+                        "open",
+                        "high",
+                        "low",
+                        "close",
+                        "adjusted_close",
+                        "volume",
+                    ]
+                ]
+
+            if range_start == "" and range_end == "":
+                df_data = df_data.tail(300)
+            elif range_start != "" and range_end == "":
+                df_data = df_data.head(300)
 
         df_data["symbol"] = symbol
         df_data["interval"] = interval
@@ -278,12 +312,6 @@ class APIClient:
                 "interval",
             ]
 
-        # set object type to display large floats
-        df_data["open"] = df_data["open"].astype(object)
-        df_data["high"] = df_data["high"].astype(object)
-        df_data["low"] = df_data["low"].astype(object)
-        df_data["close"] = df_data["close"].astype(object)
-        df_data["volume"] = df_data["volume"].astype(object)
 
         # return dataset
         if interval == "1d":
@@ -302,24 +330,31 @@ class APIClient:
                     "volume",
                 ]
             ]
-        else:
-            df_data["gmtoffset"] = df_data["gmtoffset"].astype(object)
-            df_data["epoch"] = df_data["epoch"].astype(object)
-            df_data.fillna(0, inplace=True)
 
-            return df_data[
-                [
-                    "epoch",
-                    "gmtoffset",
-                    "symbol",
-                    "interval",
-                    "open",
-                    "high",
-                    "low",
-                    "close",
-                    "volume",
-                ]
+
+        # set object type to display large floats
+        df_data.fillna(0, inplace=True)
+        df_data["gmtoffset"] = df_data["gmtoffset"].astype(object)
+        df_data["epoch"] = df_data["epoch"].astype(object)
+        df_data["open"] = df_data["open"].astype(object)
+        df_data["high"] = df_data["high"].astype(object)
+        df_data["low"] = df_data["low"].astype(object)
+        df_data["close"] = df_data["close"].astype(object)
+        df_data["volume"] = df_data["volume"].astype(object)
+
+        return df_data[
+            [
+                "epoch",
+                "gmtoffset",
+                "symbol",
+                "interval",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
             ]
+        ]
 
 
 class ScannerClient:
