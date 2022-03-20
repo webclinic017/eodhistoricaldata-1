@@ -36,10 +36,10 @@ def test_symbols_invalid():
     """Symbol is invalid: !"""
     with pytest.raises(ValueError) as execinfo:
         websocket = WebSocketClient(
-            api_key="00000000000000000000000000000000", endpoint="crypto", symbols=["!"]
+            api_key="00000000000000000000000000000000", endpoint="crypto", symbols=[""]
         )
         assert isinstance(websocket, WebSocketClient)
-    assert str(execinfo.value) == "Symbol is invalid: !"
+    assert str(execinfo.value) == "Symbol is invalid: "
 
 
 def test_instantiate_success():

@@ -160,7 +160,7 @@ class APIClient:
         results = 300
 
         # validate symbol
-        prog = re_compile(r"^[A-z0-9-$\.+]{5,48}$")
+        prog = re_compile(r"^[A-z0-9-$\.+]{1,48}$")
         if not prog.match(symbol):
             raise ValueError(f"Symbol is invalid: {symbol}")
 

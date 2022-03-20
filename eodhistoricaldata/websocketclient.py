@@ -35,7 +35,7 @@ class WebSocketClient():
             raise ValueError("No symbol(s) provided")
 
         # Validate individual symbols
-        prog = re.compile(r"^[A-z0-9-$]{5,48}$")
+        prog = re.compile(r"^[A-z0-9-$]{1,48}$")
         for symbol in symbols:
             if not prog.match(symbol):
                 raise ValueError(f"Symbol is invalid: {symbol}")
