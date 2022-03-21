@@ -164,6 +164,9 @@ class APIClient:
         if not prog.match(symbol):
             raise ValueError(f"Symbol is invalid: {symbol}")
 
+        # replace "." with "-" in markets
+        symbol = symbol.replace('.', '-', 1)
+
         minutes = 1
         if interval == "5m":
             minutes = 5
